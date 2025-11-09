@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 
+//enable tailwind in this folder
 export default {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
