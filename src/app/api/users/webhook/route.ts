@@ -13,31 +13,37 @@ export async function POST(req: NextRequest) {
     const eventType = event.type
     // console.log(`Received webhook with ID ${data.id} and event type of ${eventType}`)
     console.log('Webhook payload:', event.data)
-    
-    if(eventType === "user.created"){
-        const {data} = event
-        await db.insert(users).values({
-            clerkId: data.id,
-            name: `${data.first_name} ${data.last_name}`,
-            imageUrl: data.image_url
-        })
-    }
 
-    if(eventType === "user.deleted"){
-        const {data} = event
-        if(!data.id){
-            return new Response("Missing user id", {status: 400})
+    switch(eventType) {
+        case "user.created" : {
+            const {data} = event
+            await db.insert(users).values({
+                clerkId: data.id,
+                name: `${data.first_name} ${data.last_name}`,
+                imageUrl: data.image_url
+            })
+            break
         }
-        await db.delete(users).where(eq(users.clerkId , data.id))
-    }
 
-    if(eventType === "user.updated"){
-        const {data} = event
+        case "user.deleted" : {
+            const {data} = event
+            if(!data.id){
+                return new Response("Missing user id", {status: 400})
+            }
+            await db.delete(users).where(eq(users.clerkId , data.id))
+            break
+        }
+        
+        case "user.updated" : {
+            const {data} = event
 
-        await db.update(users).set({
-            name: `${data.first_name} ${data.last_name}`,
-            imageUrl: data.image_url
-        }).where(eq(users.clerkId, data.id))
+            await db.update(users).set({
+                name: `${data.first_name} ${data.last_name}`,
+                imageUrl: data.image_url
+            }).where(eq(users.clerkId, data.id))
+
+            break
+        }
     }
 
     return new Response('Webhook received', { status: 200 })
